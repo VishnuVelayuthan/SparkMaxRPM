@@ -13,7 +13,6 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ControlType;
 
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -22,7 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * it contains the code necessary to operate a robot with tank drive.
  */
 public class Robot extends TimedRobot {
-  private Joystick m_stick;
+
   
   private CANSparkMax m_motor;
   private CANPIDController m_pidController;
@@ -31,11 +30,13 @@ public class Robot extends TimedRobot {
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
 
 
-  private double speed = 0.25;
-  private double ratePerRevolution = 0;
+  private double speed = 1000;
+  private double rateDisplay = 0;
+ 
+
+ 
   @Override
   public void robotInit() {
-    m_stick = new Joystick(0);
 
     // initialize motor
     m_motor = new CANSparkMax(6, MotorType.kBrushless);
@@ -85,7 +86,22 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Min Output", kMinOutput);
 
     //Speed and Velocity
-    SmartDashboard.putNumber("RPM", ratePerRevolution);
+    SmartDashboard.putNumber("Speed", speed);
+
+    SmartDashboard.putNumber("Rate Display", rateDisplay);
+
+
+
+    //Set the encoder to be the feedback ting for the pid
+
+    m_pidController.setFeedbackDevice(m_encoder);
+
+    
+
+
+
+
+
   }
 
   @Override
@@ -124,23 +140,21 @@ public class Robot extends TimedRobot {
      *  com.revrobotics.ControlType.kVelocity
      *  com.revrobotics.ControlType.kVoltage
      */
-    double setPoint = m_stick.getY()*maxRPM;
 
-    
-
-    m_pidController.setReference(setPoint, ControlType.kVelocity);
-    
-    SmartDashboard.putNumber("SetPoint", setPoint);
-    SmartDashboard.putNumber("ProcessVariable", m_encoder.getVelocity());
-
-    ratePerRevolution = m_encoder.getVelocity();
+    rateDisplay = m_encoder.getVelocity();
 
     speed = SmartDashboard.getNumber("Speed", speed);
 
-    m_motor.set(speed);
 
-    SmartDashboard.putNumber("RPM", ratePerRevolution);
+    m_pidController.setReference(speed, ControlType.kVelocity);
+
+
+    SmartDashboard.putNumber("Rate Display", rateDisplay);
 
 
   }
+
+
+
+
 }
